@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>NovaPay — Banking Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">💠</div>
+    <div class="logo-text">Nova<span>Pay</span></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Overview</div>
+    <div class="nav-item active" onclick="navigate('dashboard', this)">
+      <span class="icon">🏠</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="navigate('accounts', this)">
+      <span class="icon">🗂️</span> All Accounts
+    </div>
+    <div class="nav-section-label">Operations</div>
+    <div class="nav-item" onclick="navigate('create', this)">
+      <span class="icon">➕</span> Create Account
+    </div>
+    <div class="nav-item" onclick="navigate('deposit', this)">
+      <span class="icon">💰</span> Deposit
+    </div>
+    <div class="nav-item" onclick="navigate('withdraw', this)">
+      <span class="icon">💸</span> Withdraw
+    </div>
+    <div class="nav-section-label">Records</div>
+    <div class="nav-item" onclick="navigate('search', this)">
+      <span class="icon">🔍</span> Search Account
+    </div>
+    <div class="nav-item" onclick="navigate('transactions', this)">
+      <span class="icon">📋</span> Transactions
+    </div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">AD</div>
+      <div class="user-info">
+        <div class="name">Admin User</div>
+        <div class="role">Bank Manager</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Dashboard</div>
+    <div class="topbar-right">
+      <span class="topbar-badge" id="topbarDate"></span>
+      <div class="notif-btn">🔔<div class="notif-dot"></div></div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page active" id="page-dashboard">
+      <div class="section-title">Welcome back 👋</div>
+      <div class="section-subtitle">Here's your banking system overview for today.</div>
+
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-icon">🏦</div>
+          <div class="stat-label">Total Accounts</div>
+          <div class="stat-value" id="stat-total-accounts">0</div>
+          <div class="stat-sub">Registered accounts</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-icon">💰</div>
+          <div class="stat-label">Total Balance</div>
+          <div class="stat-value" id="stat-total-balance">₹0</div>
+          <div class="stat-sub">Across all accounts</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-icon">📤</div>
+          <div class="stat-label">Total Withdrawals</div>
+          <div class="stat-value" id="stat-total-withdraw">₹0</div>
+          <div class="stat-sub">All time</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="stat-icon">📥</div>
+          <div class="stat-label">Total Deposits</div>
+          <div class="stat-value" id="stat-total-deposit">₹0</div>
+          <div class="stat-sub">All time</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Recent Transactions</span>
+            <button class="btn btn-outline btn-sm" onclick="navigate('transactions', document.querySelector('[onclick*=transactions]'))">View All</button>
+          </div>
+          <div id="dash-recent-txn">
+            <div class="empty-state">
+              <div class="e-icon">📭</div>
+              <p>No transactions yet.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Top Accounts by Balance</span>
+          </div>
+          <div id="dash-top-accounts">
+            <div class="empty-state">
+              <div class="e-icon">🗂️</div>
+              <p>No accounts yet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ALL ACCOUNTS ── -->
+    <div class="page" id="page-accounts">
+      <div class="section-title">All Accounts</div>
+      <div class="section-subtitle">Browse and manage all registered bank accounts.</div>
+      <div class="card">
+        <div class="card-header">
+          <div class="search-bar" style="width:260px">
+            <span>🔍</span>
+            <input type="text" id="accountSearch" placeholder="Search by name or acc no..." oninput="filterAccounts()"/>
+          </div>
+          <span class="pill" id="accCount">0 accounts</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr><th>Acc No</th><th>Name</th><th>Balance</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="accountsTableBody">
+              <tr><td colspan="5"><div class="empty-state"><div class="e-icon">🗂️</div><p>No accounts found.</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CREATE ACCOUNT ── -->
+    <div class="page" id="page-create">
+      <div class="section-title">Create Account</div>
+      <div class="section-subtitle">Register a new bank account. Minimum initial deposit: ₹500.</div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Account Details</span></div>
+          <div class="card-body">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Account Number</label>
+                <input type="number" id="c-accno" placeholder="e.g. 1001"/>
+              </div>
+              <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="c-name" placeholder="e.g. Arjun Sharma"/>
+              </div>
+              <div class="form-group span2">
+                <label>Initial Deposit (min ₹500)</label>
+                <input type="number" id="c-balance" placeholder="e.g. 1000"/>
+              </div>
+            </div>
+            <div style="margin-top:20px;display:flex;gap:10px">
+              <button class="btn btn-primary" onclick="createAccount()">➕ Create Account</button>
+              <button class="btn btn-outline" onclick="clearCreate()">Clear</button>
+            </div>
+            <div class="result-box" id="create-result"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Account Creation Tips</span></div>
+          <div class="card-body">
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div style="display:flex;gap:12px;align-items:flex-start">
+                <span style="font-size:1.2rem">📌</span>
+                <div>
+                  <div style="font-weight:600;font-size:0.88rem;color:var(--slate-700);margin-bottom:2px">Unique Account Number</div>
+                  <div style="font-size:0.83rem;color:var(--slate-400)">Account numbers must be unique and positive integers.</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start">
+                <span style="font-size:1.2rem">💵</span>
+                <div>
+                  <div style="font-weight:600;font-size:0.88rem;color:var(--slate-700);margin-bottom:2px">Minimum Deposit</div>
+                  <div style="font-size:0.83rem;color:var(--slate-400)">Initial deposit must be at least ₹500 to activate the account.</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start">
+                <span style="font-size:1.2rem">✍️</span>
+                <div>
+                  <div style="font-weight:600;font-size:0.88rem;color:var(--slate-700);margin-bottom:2px">Full Name Required</div>
+                  <div style="font-size:0.83rem;color:var(--slate-400)">Enter the account holder's full legal name.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DEPOSIT ── -->
+    <div class="page" id="page-deposit">
+      <div class="section-title">Deposit Funds</div>
+      <div class="section-subtitle">Credit an amount into a customer account.</div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Deposit Form</span></div>
+          <div class="card-body">
+            <div class="form-grid single">
+              <div class="form-group">
+                <label>Account Number</label>
+                <input type="number" id="d-accno" placeholder="Enter account number" oninput="previewAccount('d-accno','d-preview')"/>
+              </div>
+              <div id="d-preview"></div>
+              <div class="form-group">
+                <label>Deposit Amount (₹)</label>
+                <input type="number" id="d-amount" placeholder="e.g. 5000"/>
+              </div>
+            </div>
+            <div style="margin-top:20px">
+              <button class="btn btn-success" onclick="deposit()">💰 Confirm Deposit</button>
+            </div>
+            <div class="result-box" id="deposit-result"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Recent Deposits</span></div>
+          <div id="recent-deposits">
+            <div class="empty-state"><div class="e-icon">📥</div><p>No deposits yet.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── WITHDRAW ── -->
+    <div class="page" id="page-withdraw">
+      <div class="section-title">Withdraw Funds</div>
+      <div class="section-subtitle">Debit an amount from a customer account.</div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Withdrawal Form</span></div>
+          <div class="card-body">
+            <div class="form-grid single">
+              <div class="form-group">
+                <label>Account Number</label>
+                <input type="number" id="w-accno" placeholder="Enter account number" oninput="previewAccount('w-accno','w-preview')"/>
+              </div>
+              <div id="w-preview"></div>
+              <div class="form-group">
+                <label>Withdrawal Amount (₹)</label>
+                <input type="number" id="w-amount" placeholder="e.g. 2000"/>
+              </div>
+            </div>
+            <div style="margin-top:20px">
+              <button class="btn btn-danger" onclick="withdraw()">💸 Confirm Withdrawal</button>
+            </div>
+            <div class="result-box" id="withdraw-result"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Recent Withdrawals</span></div>
+          <div id="recent-withdrawals">
+            <div class="empty-state"><div class="e-icon">📤</div><p>No withdrawals yet.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SEARCH ── -->
+    <div class="page" id="page-search">
+      <div class="section-title">Search Account</div>
+      <div class="section-subtitle">Look up a specific account by account number.</div>
+      <div class="card" style="max-width:540px">
+        <div class="card-header"><span class="card-title">Search by Account Number</span></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label>Account Number</label>
+            <input type="number" id="s-accno" placeholder="Enter account number"/>
+          </div>
+          <div style="margin-top:16px">
+            <button class="btn btn-primary" onclick="searchAccount()">🔍 Search</button>
+          </div>
+          <div class="result-box" id="search-result"></div>
+          <div id="search-detail" style="margin-top:18px;display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TRANSACTIONS ── -->
+    <div class="page" id="page-transactions">
+      <div class="section-title">Transaction Log</div>
+      <div class="section-subtitle">View last 5 transactions for any account, or browse all.</div>
+      <div class="two-col" style="margin-bottom:24px">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Last 5 Transactions</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label>Account Number</label>
+              <input type="number" id="t-accno" placeholder="Enter account number"/>
+            </div>
+            <div style="margin-top:14px">
+              <button class="btn btn-primary" onclick="viewLastTransactions()">📋 View Transactions</button>
+            </div>
+            <div class="result-box" id="txn-result"></div>
+          </div>
+        </div>
+        <div class="card" id="txn-list-card">
+          <div class="card-header"><span class="card-title">Result</span></div>
+          <div id="txn-list">
+            <div class="empty-state"><div class="e-icon">📋</div><p>Enter an account number and search.</p></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">All Transactions</span>
+          <span class="pill" id="txn-all-count">0 records</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr><th>Acc No</th><th>Type</th><th>Amount</th><th>Date & Time</th></tr>
+            </thead>
+            <tbody id="allTxnBody">
+              <tr><td colspan="4"><div class="empty-state"><div class="e-icon">📭</div><p>No transactions yet.</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
